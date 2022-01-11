@@ -64,25 +64,20 @@ class Music(commands.Cog):
         """Summons the bot to a voice channel.
         If no channel was specified, it joins your channel.
         """
-
         if not channel and not ctx.author.voice:
             raise voice.VoiceError('You are neither connected to a voice channel nor specified a channel to join.')
-
         destination = channel or ctx.author.voice.channel
         if ctx.voice_state.voice:
             await ctx.voice_state.voice.move_to(destination)
             return
-
         ctx.voice_state.voice = await destination.connect()
 
     @commands.command(name='leave', aliases=['disconnect'])
     @commands.has_permissions(manage_guild=True)
     async def _leave(self, ctx: commands.Context):
         """Clears the queue and leaves the voice channel."""
-
         if not ctx.voice_state.voice:
             return await ctx.send('Not connected to any voice channel.')
-
         await ctx.voice_state.stop()
         del self.voice_states[ctx.guild.id]
 
@@ -90,13 +85,10 @@ class Music(commands.Cog):
     @commands.is_owner()
     async def _volume(self, ctx: commands.Context, *, volume: int):
         """Sets the volume of the player."""
-
         if not ctx.voice_state.is_playing:
             return await ctx.send('Nothing being played at the moment.')
-
         if 0 > volume > 100:
             return await ctx.send('Volume must be between 0 and 100')
-
         ctx.voice_state.volume = volume / 100
         await ctx.send('Volume of the player set to {}%'.format(volume))
 
@@ -119,7 +111,6 @@ class Music(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def _resume(self, ctx: commands.Context):
         """Resumes a currently paused song."""
-
         if ctx.voice_state.is_playing and ctx.voice_state.voice.is_paused():
             ctx.voice_state.voice.resume()
             await ctx.message.add_reaction('⏯')
@@ -128,7 +119,6 @@ class Music(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def _stop(self, ctx: commands.Context):
         """Stops playing song and clears the queue."""
-
         ctx.voice_state.songs.clear()
 
         if ctx.voice_state.autoplay:
