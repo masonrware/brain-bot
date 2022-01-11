@@ -38,11 +38,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     def __init__(self, ctx: commands.Context, source: discord.FFmpegPCMAudio, *, data: dict, volume: float = 0.5):
         super().__init__(source, volume)
-
         self.requester = ctx.author
         self.channel = ctx.channel
         self.data = data
-
         self.uploader = data.get('uploader')
         self.uploader_url = data.get('uploader_url')
         date = data.get('upload_date')
@@ -64,13 +62,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def create_source(cls, ctx: commands.Context, search: str, *, loop: asyncio.BaseEventLoop = None):
         loop = loop or asyncio.get_event_loop()
-
         partial = functools.partial(cls.ytdl.extract_info, search, download=False, process=False)
         data = await loop.run_in_executor(None, partial)
-
         if data is None:
             raise YTDLError('Couldn\'t find anything that matches `{}`'.format(search))
-
         if 'entries' not in data:
             process_info = data
         else:
@@ -82,14 +77,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
             if process_info is None:
                 raise YTDLError('Couldn\'t find anything that matches `{}`'.format(search))
-
         webpage_url = process_info['webpage_url']
         partial = functools.partial(cls.ytdl.extract_info, webpage_url, download=False)
         processed_info = await loop.run_in_executor(None, partial)
-
         if processed_info is None:
             raise YTDLError('Couldn\'t fetch `{}`'.format(webpage_url))
-
         if 'entries' not in processed_info:
             info = processed_info
         else:
@@ -99,7 +91,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
                     info = processed_info['entries'].pop(0)
                 except IndexError:
                     raise YTDLError('Couldn\'t retrieve any matches for `{}`'.format(webpage_url))
-
         return cls(ctx, discord.FFmpegPCMAudio(info['url'], **cls.FFMPEG_OPTIONS), data=info)
 
     @classmethod
@@ -107,30 +98,19 @@ class YTDLSource(discord.PCMVolumeTransformer):
                             loop: asyncio.BaseEventLoop = None):
         channel = ctx.channel
         loop = loop or asyncio.get_event_loop()
-
         cls.search_query = '%s%s:%s' % ('ytsearch', 10, ''.join(search))
-
         partial = functools.partial(cls.ytdl.extract_info, cls.search_query, download=False, process=False)
         info = await loop.run_in_executor(None, partial)
-
-        cls.search = {}
-        cls.search["title"] = f'Search results for:\n**{search}**'
-        cls.search["type"] = 'rich'
-        cls.search["color"] = 7506394
-        cls.search["author"] = {'name': f'{ctx.author.name}', 'url': f'{ctx.author.avatar_url}',
-                                'icon_url': f'{ctx.author.avatar_url}'}
-
+        cls.search = {"title": f'Search results for:\n**{search}**', "type": 'rich', "color": 7506394,
+                      "author": {'name': f'{ctx.author.name}', 'url': f'{ctx.author.avatar_url}',
+                                 'icon_url': f'{ctx.author.avatar_url}'}}
         lst = []
-
         for e in info['entries']:
-            # lst.append(f'`{info["entries"].index(e) + 1}.` {e.get("title")} **[{YTDLSource.parse_duration(int(e.get("duration")))}]**\n')
             VId = e.get('id')
             VUrl = 'https://www.youtube.com/watch?v=%s' % (VId)
             lst.append(f'`{info["entries"].index(e) + 1}.` [{e.get("title")}]({VUrl})\n')
-
         lst.append('\n**Type a number to make a choice, Type `cancel` to exit**')
         cls.search["description"] = "\n".join(lst)
-
         em = discord.Embed.from_dict(cls.search)
         await ctx.send(embed=em, delete_after=45.0)
 
@@ -139,17 +119,14 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         try:
             m = await bot.wait_for('message', check=check, timeout=45.0)
-
         except asyncio.TimeoutError:
             rtrn = 'timeout'
-
         else:
-            if m.content.isdigit() == True:
+            if m.content.isdigit():
                 sel = int(m.content)
                 if 0 < sel <= 10:
                     for key, value in info.items():
                         if key == 'entries':
-                            """data = value[sel - 1]"""
                             VId = value[sel - 1]['id']
                             VUrl = 'https://www.youtube.com/watch?v=%s' % (VId)
                             partial = functools.partial(cls.ytdl.extract_info, VUrl, download=False)
@@ -161,16 +138,15 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 rtrn = 'cancel'
             else:
                 rtrn = 'sel_invalid'
-
         return rtrn
 
     @staticmethod
     def parse_duration(duration: int):
+        value = ''
         if duration > 0:
             minutes, seconds = divmod(duration, 60)
             hours, minutes = divmod(minutes, 60)
             days, hours = divmod(hours, 24)
-
             duration = []
             if days > 0:
                 duration.append('{}'.format(days))
@@ -180,10 +156,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 duration.append('{}'.format(minutes))
             if seconds > 0:
                 duration.append('{}'.format(seconds))
-
             value = ':'.join(duration)
-
         elif duration == 0:
             value = "LIVE"
-
         return value
