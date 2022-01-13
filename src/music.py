@@ -42,7 +42,7 @@ class Music(commands.Cog):
             if message.embeds:
                 print(message.embeds[0].to_dict())
 
-    @commands.command(name='join', invoke_without_subcommand=True)
+    @commands.command(name='join', invoke_without_subcommand=True, aliases=['j'])
     async def _join(self, ctx: commands.Context):
         """Joins a voice channel."""
         destination = ctx.author.voice.channel
@@ -65,7 +65,7 @@ class Music(commands.Cog):
             return
         ctx.voice_state.voice = await destination.connect()
 
-    @commands.command(name='leave', aliases=['disconnect'])
+    @commands.command(name='leave', aliases=['disconnect', 'l'])
     @commands.has_permissions(manage_guild=True)
     async def _leave(self, ctx: commands.Context):
         """Clears the queue and leaves the voice channel."""
@@ -100,7 +100,7 @@ class Music(commands.Cog):
             ctx.voice_state.voice.pause()
             await ctx.message.add_reaction('⏯')
 
-    @commands.command(name='resume', aliases=['re', 'res'])
+    @commands.command(name='resume', aliases=['re', 'res', 'r'])
     @commands.has_permissions(manage_guild=True)
     async def _resume(self, ctx: commands.Context):
         """Resumes a currently paused song."""
@@ -136,11 +136,11 @@ class Music(commands.Cog):
         elif voter.id not in ctx.voice_state.skip_votes:
             ctx.voice_state.skip_votes.add(voter.id)
             total_votes = len(ctx.voice_state.skip_votes)
-            if total_votes >= 3:            #change here
-                await ctx.message.add_reaction('⏭')
-                ctx.voice_state.skip()
-            else:
-                await ctx.send('Skip vote added, currently at **{}/3**'.format(total_votes))
+            # if total_votes >= 3:            #change here
+            await ctx.message.add_reaction('⏭')
+            ctx.voice_state.skip()
+            # else:
+            #     await ctx.send('Skip vote added, currently at **{}/3**'.format(total_votes))
         else:
             await ctx.send('You have already voted to skip this song.')
 
@@ -162,7 +162,7 @@ class Music(commands.Cog):
                  .set_footer(text='Viewing page {}/{}'.format(page, pages)))
         await ctx.send(embed=embed)
 
-    @commands.command(name='history')
+    @commands.command(name='history', aliases=['h'])
     async def _history(self, ctx: commands.Context, *, page: int = 1):
         """Shows the player's history.
         You can optionally specify the page to show. Each page contains 10 elements.
