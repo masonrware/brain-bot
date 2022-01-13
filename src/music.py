@@ -107,6 +107,8 @@ class Music(commands.Cog):
         if ctx.voice_state.is_playing and ctx.voice_state.voice.is_paused():
             ctx.voice_state.voice.resume()
             await ctx.message.add_reaction('⏯')
+        else:
+            await ctx.send('No song to resume')
 
     @commands.command(name='stop')
     @commands.has_permissions(manage_guild=True)
@@ -130,19 +132,10 @@ class Music(commands.Cog):
         if not ctx.voice_state.is_playing:
             return await ctx.send('Not playing any music right now...')
         voter = ctx.message.author
-        if voter == ctx.voice_state.current.requester:
-            await ctx.message.add_reaction('⏭')
-            ctx.voice_state.skip()
-        elif voter.id not in ctx.voice_state.skip_votes:
-            ctx.voice_state.skip_votes.add(voter.id)
-            total_votes = len(ctx.voice_state.skip_votes)
-            # if total_votes >= 3:            #change here
-            await ctx.message.add_reaction('⏭')
-            ctx.voice_state.skip()
-            # else:
-            #     await ctx.send('Skip vote added, currently at **{}/3**'.format(total_votes))
-        else:
-            await ctx.send('You have already voted to skip this song.')
+        await ctx.message.add_reaction('⏭')
+        ctx.voice_state.skip()
+        if len(ctx.voice_state.songs) == 0:
+            ctx.voice_state.current = None
 
     @commands.command(name='queue', aliases=['q'])
     async def _queue(self, ctx: commands.Context, *, page: int = 1):
