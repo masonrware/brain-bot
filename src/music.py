@@ -120,6 +120,8 @@ class Music(commands.Cog):
             ctx.voice_state.voice.stop()
             await ctx.message.add_reaction('⏹')
 
+
+    #might want to change the skip 3 vote min
     @commands.command(name='skip', aliases=['s'])
     async def _skip(self, ctx: commands.Context):
         """Vote to skip a song. The requester can automatically skip.
@@ -134,7 +136,7 @@ class Music(commands.Cog):
         elif voter.id not in ctx.voice_state.skip_votes:
             ctx.voice_state.skip_votes.add(voter.id)
             total_votes = len(ctx.voice_state.skip_votes)
-            if total_votes >= 3:
+            if total_votes >= 3:            #change here
                 await ctx.message.add_reaction('⏭')
                 ctx.voice_state.skip()
             else:
@@ -142,7 +144,7 @@ class Music(commands.Cog):
         else:
             await ctx.send('You have already voted to skip this song.')
 
-    @commands.command(name='queue')
+    @commands.command(name='queue', aliases=['q'])
     async def _queue(self, ctx: commands.Context, *, page: int = 1):
         """Shows the player's queue.
         You can optionally specify the page to show. Each page contains 10 elements.
@@ -199,12 +201,14 @@ class Music(commands.Cog):
         """Loops the currently playing song.
         Invoke this command again to unloop the song.
         """
-        if not ctx.voice_state.is_playing:
+        if ctx.voice_state.is_playing:
             return await ctx.send('Nothing being played at the moment.')
         ctx.voice_state.loop = not ctx.voice_state.loop
         await ctx.message.add_reaction('✅')
         await ctx.send('Looping a song is now turned ' + ('on' if ctx.voice_state.loop else 'off'))
 
+
+    ###smth weird here
     @commands.command(name='autoplay')
     async def _autoplay(self, ctx: commands.Context):
         """Automatically queue a new song that is related to the song at the end of the queue.
