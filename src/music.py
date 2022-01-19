@@ -88,8 +88,11 @@ class Music(commands.Cog):
     @commands.command(name='now', aliases=['current', 'playing', 'np', 'nowplaying'])
     async def _now(self, ctx: commands.Context):
         """Displays the currently playing song."""
-        embed = ctx.voice_state.current.create_embed()
-        await ctx.send(embed=embed)
+        if not ctx.voice_state.current:
+            return await ctx.send('Not playing any music right now...')
+        else:
+            embed = ctx.voice_state.current.create_embed()
+            await ctx.send(embed=embed)
 
     @commands.command(name='pause', aliases=['pa'])
     @commands.has_permissions(manage_guild=True)
@@ -123,7 +126,6 @@ class Music(commands.Cog):
             await ctx.message.add_reaction('⏹')
 
 
-    #might want to change the skip 3 vote min
     @commands.command(name='skip', aliases=['s'])
     async def _skip(self, ctx: commands.Context):
         """Vote to skip a song. The requester can automatically skip.
