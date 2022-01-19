@@ -11,7 +11,7 @@ bot = commands.Bot(command_prefix='//', description="Tha Illest MC")
 
 @bot.event
 async def on_ready():
-    activity = discord.Activity(type=discord.ActivityType.listening, name='to //')
+    activity = discord.Activity(type=discord.ActivityType.listening, name='//help')
     await bot.change_presence(activity=activity)
     print(f'Logged in as {bot.user.name}')
     bot.add_cog(music.Music(bot))
